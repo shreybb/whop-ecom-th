@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The 12-Week Transformation System — Northstar Method</title>
+  <style>
+    :root { --orange: #e8460f; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; color: #222; background: #fff; line-height: 1.65; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+    h1 { font-size: clamp(26px, 5vw, 42px); line-height: 1.2; margin: 32px 0 16px; }
+    h2 { font-size: 24px; margin: 32px 0 12px; }
+    p { margin-bottom: 16px; }
+    .orange { color: var(--orange); }
+    .callout { background: #fff8f5; border-left: 4px solid var(--orange); padding: 20px 24px; margin: 24px 0; }
+    .cta-box { background: var(--orange); color: #fff; text-align: center; padding: 40px 24px; margin: 40px 0; border-radius: 12px; }
+    .cta-btn { display: inline-block; background: #fff; color: var(--orange); font-weight: 700; font-size: 18px; padding: 16px 36px; border-radius: 999px; text-decoration: none; margin-top: 16px; font-family: sans-serif; }
+    .lead-form { background: #f9f9f9; border: 1px solid #eee; border-radius: 12px; padding: 28px; margin: 32px 0; }
+    .lead-form input { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin: 12px 0 8px; }
+    .lead-form button { width: 100%; background: var(--orange); color: #fff; border: none; padding: 14px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; }
+    .disclaimer { font-size: 11px; color: #aaa; text-align: center; margin-top: 48px; padding-bottom: 48px; }
+  </style>
+</head>
+<body>
+<script src="https://t.whop.tw/e/biz_MIbRyC2ejVkuzs.js" async></script>
+
+<div class="wrap">
+  <p style="margin-top:32px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);font-weight:700;">Special Report</p>
+  <h1>The 12-Week System That <span class="orange">Actually Works</span> — Even If You Have Failed Before</h1>
+  <p style="font-size:14px;color:#555;margin-bottom:32px;">By the Northstar Method Team &mdash; September 2026</p>
+
+  <p><strong>94% of people who start a fitness program quit by week three.</strong> It is not willpower. It is that the program was built wrong.</p>
+  <p>After 8 years coaching 2,400+ people, we identified exactly what separates the 6% who transform from the 94% who quit.</p>
+
+  <div class="callout">
+    <strong>Why most programs fail:</strong>
+    <ol style="margin-top:8px;padding-left:18px">
+      <li>Same intensity in week 1 as week 12.</li>
+      <li>Nutrition ignored or impossibly complex.</li>
+      <li>Zero accountability after purchase.</li>
+    </ol>
+  </div>
+
+  <h2>What the Northstar Method Does Differently</h2>
+  <p>Every 12-week block is periodised. Intensity, volume, and nutrition change in a coordinated way. Week 1 is not supposed to destroy you. Week 10 is.</p>
+  <p>Nutrition is built around one simple macro target. Most people hit 80-90% compliance. That is enough.</p>
+
+  <div class="cta-box">
+    <h2 style="color:#fff">Ready to Start?</h2>
+    <p>The 12-Week Program is open now. One-time payment. Lifetime access.</p>
+    <a href="https://kernelpanic.whop.site/#pricing" class="cta-btn" id="cta-link">See the Program &rarr;</a>
+  </div>
+
+  <div class="lead-form">
+    <div id="lead-form-inner">
+      <h3 style="font-family:sans-serif;margin-bottom:8px;">Get the Free Northstar Starter Guide</h3>
+      <p style="font-size:14px;color:#555;">Enter your email and we will send it now.</p>
+      <form id="lead-form-el">
+        <input type="email" id="lead-email" placeholder="your@email.com" required />
+        <button type="submit">Send Me the Free Guide</button>
+      </form>
+    </div>
+    <div id="lead-success" style="display:none;text-align:center;padding:16px 0">
+      <strong>Check your inbox!</strong>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    Advertorial for Northstar Method on Whop. Individual results may vary.
+  </p>
+</div>
+
+<script>
+(function() {
+  function uid() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  function track(name, data) {
+    if (window.whop && window.whop.track) {
+      window.whop.track(name, data);
+    }
+  }
+
+  window.addEventListener('load', function() {
+    if (window.whop && window.whop.setScope) {
+      window.whop.setScope('biz_MIbRyC2ejVkuzs');
+    }
+    track('view_content', { event_id: uid(), page: 'advertorial' });
+  });
+
+  var ctaLink = document.getElementById('cta-link');
+  if (ctaLink) {
+    ctaLink.addEventListener('click', function() {
+      track('add_to_cart', { event_id: uid(), source: 'advertorial_cta' });
+    });
+  }
+
+  var form = document.getElementById('lead-form-el');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('lead-email').value.trim();
+      if (!email) return;
+      track('lead', { event_id: uid(), email: email, source: 'advertorial' });
+      document.getElementById('lead-success').style.display = 'block';
+      document.getElementById('lead-form-inner').style.display = 'none';
+    });
+  }
+})();
+</script>
+</body>
+</html>

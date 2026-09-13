@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kernelpanic",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./src/worker.ts",
+  // Provision a real KV namespace and add its ID below before deploying to production.
+  // Command: wrangler kv:namespace create IDEMPOTENCY_KV
+  // "kv_namespaces": [
+  //   { "binding": "IDEMPOTENCY_KV", "id": "<your-kv-namespace-id>" }
+  // ]
+}
