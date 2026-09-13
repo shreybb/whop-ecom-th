@@ -1,196 +1,172 @@
-Welcome to your new TanStack Start app!
+# Northstar Method — Whop Storefront
 
-# Getting Started
+Fitness coaching storefront built on Whop, implementing the FDE assessment requirements.
 
-To run this application:
+**Business:** `biz_MIbRyC2ejVkuzs`  
+**App:** `app_hNmLREmR4ScgWh`  
+**Build (initial):** `apbu_X9Js1D7Sr67kO`  
+**Live URL:** `https://kernelpanic.whop.site`
+
+---
+
+## Stack
+
+- **Framework:** TanStack Start (React + TanStack Router, SSR)
+- **Hosting:** Cloudflare Workers via `@cloudflare/vite-plugin`
+- **Checkout:** Whop Elements embedded checkout + checkout-link CTAs
+- **Pixel:** Whop pixel (`https://t.whop.tw/e/{biz_id}.js`) for browser-side tracking
+- **Webhooks:** Standard Webhooks signature verification (`standardwebhooks` library)
+- **Idempotency:** In-memory adapter (dev/test) + Cloudflare KV contract (prod)
+
+---
+
+## Local Development
 
 ```bash
-bun install
-bun --bun run dev
+# 1. Install dependencies
+pnpm install
+
+# 2. Copy env and fill in values
+cp .env.example .env
+
+# 3. Start dev server
+pnpm dev        # → http://localhost:3000
 ```
 
-# Building For Production
+---
 
-To build this application for production:
+## Environment Variables
+
+See `.env.example` for the full list.  
+**Never commit `.env` or real secrets.**
+
+| Variable | Required | Description |
+|---|---|---|
+| `WHOP_API_KEY` | Yes | From whop.com/dashboard → Settings → API |
+| `WHOP_COMPANY_ID` | Yes | `biz_MIbRyC2ejVkuzs` |
+| `WHOP_WEBHOOK_SECRET` | Yes | From webhook registration (format: `whsec_...`) |
+| `WHOP_PLAN_12WK` | Yes | Plan ID for the 12-Week Program |
+| `WHOP_PLAN_MONTHLY` | Yes | Plan ID for Monthly membership |
+| `WHOP_PLAN_YEARLY` | Yes | Plan ID for Annual membership |
+| `WHOP_API_ORIGIN` | No | Override API base (default: https://api.whop.com) |
+
+---
+
+## Product & Plan Setup (Dashboard Steps)
+
+1. Go to **whop.com/dashboard/biz_MIbRyC2ejVkuzs/products/**
+2. Create one product: **Northstar 12-Week Program**
+3. Add three plans:
+   - **$297 one-time** (strike-through $397) → copy ID as `WHOP_PLAN_12WK`
+   - **$49/month** with 7-day trial → copy ID as `WHOP_PLAN_MONTHLY`
+   - **$399/year** → copy ID as `WHOP_PLAN_YEARLY`
+4. Add a **Founding Member** plan (hidden from store page)
+5. Add a **Waitlist** plan for the live cohort
+6. Add **two checkout questions** in each plan's settings
+7. Set the **redirect URL** after checkout to: `https://kernelpanic.whop.site/order-complete`
+
+---
+
+## Webhook Registration
+
+1. Go to **Settings → Webhooks → Add Webhook**
+2. URL: `https://kernelpanic.whop.site/api/webhooks`
+3. Events to subscribe:
+   - `payment.succeeded`
+   - `membership.activated`
+   - `membership.deactivated`
+   - `refund.created`
+4. Copy the signing secret → set as `WHOP_WEBHOOK_SECRET`
+
+---
+
+## Webhook Idempotency (Production)
+
+The in-memory idempotency store is **dev/test only**. For production:
 
 ```bash
-bun --bun run build
+# Create a Cloudflare KV namespace
+wrangler kv:namespace create IDEMPOTENCY_KV
+
+# Add the returned namespace ID to wrangler.jsonc:
+# "kv_namespaces": [{ "binding": "IDEMPOTENCY_KV", "id": "<id>" }]
 ```
 
-## Styling
+Without this, `createIdempotencyStore` throws at startup in production.
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+---
 
-### Removing Tailwind CSS
+## Pixel Tracking & Event-ID Propagation
 
-If you prefer not to use Tailwind CSS:
+### Browser → Server Deduplication
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
+1. User visits page → `view_content` fires (fresh event_id)
+2. User clicks plan CTA → `add_to_cart` fires (fresh event_id stored in `sessionStorage`)
+3. Checkout session is created with `metadata.event_id` = that event_id
+4. User submits checkout → Whop fires `payment.succeeded` webhook
+5. Webhook handler reads `event.data.metadata.event_id` and fires a server pixel
+   event with `event_name="lead"` and the **same event_id**
+6. Meta/Whop deduplicates the browser + server signals
 
+### External Advertorial Page
 
-## Deploy to Cloudflare Workers
+`public/advertorial.html` is a static page that:
+- Loads the Whop pixel: `https://t.whop.tw/e/biz_MIbRyC2ejVkuzs.js`
+- Calls `window.whop.setScope("biz_MIbRyC2ejVkuzs")` on load
+- Fires `view_content`, `lead`, and `add_to_cart` with unique event_ids
+- Links to `https://kernelpanic.whop.site/#pricing`
 
-This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) and `wrangler.jsonc`:
+### Verify in Dashboard
 
-1. Install Wrangler: `npm install -g wrangler`
-2. Authenticate: `wrangler login`
-3. Deploy: `npx wrangler deploy`
+**Northstar Dashboard → Analytics → Pixel Events** should show events from both the Whop-hosted site and the external advertorial page.
 
-For production env vars, run `wrangler secret put MY_VAR` for each secret listed in `.env.example`. Public (non-secret) vars go in `wrangler.jsonc` under `vars`.
+---
 
-KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc` — see https://developers.cloudflare.com/workers/wrangler/configuration/.
+## Deployment
 
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
+```bash
+pnpm deploy    # runs: whop apps deploy
 ```
 
-Then anywhere in your JSX you can use it like so:
+This builds and uploads to Cloudflare Workers via the Whop CLI.
 
-```tsx
-<Link to="/about">About</Link>
+### Roll Back
+
+```bash
+whop apps builds list
+whop apps builds promote --build <previous-build-id>
 ```
 
-This will create a link that will navigate to the `/about` route.
+---
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+## Testing
 
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
+```bash
+pnpm test              # run once
+pnpm test:watch        # watch mode
+pnpm test:coverage     # with coverage report (target: 80%+)
 ```
 
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
+Tests cover:
+- Signature verification (valid, tampered, missing headers)
+- Timestamp boundaries (5-minute tolerance, stale, future)
+- Sequential and concurrent idempotency
+- Event dispatch (payment.succeeded server pixel, no-event-id skip)
+- Tracking utilities (UUID uniqueness, sessionStorage persistence)
+- Idempotency store (mark, has, checkAndMark, concurrent, TTL eviction)
 
-## Server Functions
+---
 
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
+## Remaining Manual / Dashboard Steps
 
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+- [ ] Connect Meta Pixel ID: **Settings → Integrations → Meta Pixel**
+- [ ] Create promo code: **Marketing → Promo Codes**
+- [ ] Set up affiliate program: **Marketing → Affiliates** (global and member rates)
+- [ ] Configure post-purchase upsell to Annual plan
+- [ ] Enable automated abandoned-checkout message
+- [ ] Build Ads campaign (stop at review screen)
+- [ ] Invite advertiser role team member
+- [ ] Register the webhook endpoint (see above)
+- [ ] Verify identity to unlock payouts: **Settings → Verification**
+- [ ] Buy a test $1 plan to confirm checkout + webhook flow
+- [ ] Partially refund the test payment via API and confirm `refund.created` arrives
