@@ -1,9 +1,17 @@
 import type { Product } from "#/lib/catalog";
+import { NORTHSTAR_RESOURCES } from "#/lib/resources";
 
 /**
- * Seed products used when no live plans exist yet.
- * Plan IDs are read from env vars (WHOP_PLAN_12WK, WHOP_PLAN_MONTHLY, WHOP_PLAN_YEARLY).
- * These placeholders keep the UI functional before dashboard setup.
+ * Seed products — used as fallback when the Whop API is unavailable.
+ *
+ * Plan IDs come from NORTHSTAR_RESOURCES (committed, not secret) so the
+ * correct checkout links are always present in the browser, whether the
+ * live Whop catalogue loaded or not.
+ *
+ * NOTE: process.env is NOT used here. Cloudflare Worker runtime secrets
+ * are not available at module scope during the client bundle, so env-var
+ * lookups at this level would silently fall back to placeholders. Real
+ * IDs are committed as public resource identifiers in resources.ts.
  */
 function p(
   handle: string,
@@ -28,19 +36,13 @@ function p(
   };
 }
 
-function envPlanId(envKey: string, fallback: string): string {
-  // In Cloudflare Workers the env is injected at runtime, not available here at module scope.
-  // The catalog.server.ts will use live Whop data if plans exist; seed is the fallback.
-  return typeof process !== "undefined" ? (process.env[envKey] ?? fallback) : fallback;
-}
-
 export const seedProducts: Product[] = [
   p(
     "northstar-12wk",
     "Northstar 12-Week Program",
     "A complete 12-week fitness transformation: training plans, nutrition coaching, and a private community.",
     297,
-    envPlanId("WHOP_PLAN_12WK", "plan_REPLACE_12WK"),
+    NORTHSTAR_RESOURCES.plans.twelveWeek,
     "one_time",
   ),
   p(
@@ -48,7 +50,7 @@ export const seedProducts: Product[] = [
     "Northstar Monthly",
     "Full program access plus weekly live Q&A and direct coach messaging. Includes a 7-day free trial.",
     49,
-    envPlanId("WHOP_PLAN_MONTHLY", "plan_REPLACE_MONTHLY"),
+    NORTHSTAR_RESOURCES.plans.monthly,
     "recurring",
   ),
   p(
@@ -56,7 +58,7 @@ export const seedProducts: Product[] = [
     "Northstar Annual",
     "Best value. Everything in Monthly plus a 1-on-1 strategy session and priority support.",
     399,
-    envPlanId("WHOP_PLAN_YEARLY", "plan_REPLACE_YEARLY"),
+    NORTHSTAR_RESOURCES.plans.yearly,
     "recurring",
   ),
 ];
