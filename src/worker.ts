@@ -15,7 +15,6 @@ export default {
     if (url.pathname === "/api/webhooks" && request.method === "POST") {
       return handleWebhookRequest(request, env);
     }
-    // ssrFetch signature: (request, env) - pass env as Record
     return ssrFetch(request as unknown as Parameters<typeof ssrFetch>[0]);
   },
 };

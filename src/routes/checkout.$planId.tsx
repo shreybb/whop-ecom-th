@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ElementsCheckout } from "#/components/elements-checkout";
 import { money } from "#/lib/money";
 import { loadStoreAccountId, loadStoreBrand, loadStoreCatalog } from "#/lib/server-fns";
-import { getCheckoutEventId, trackAddToCart } from "#/lib/tracking";
+import { getCheckoutEventId } from "#/lib/tracking";
 
 export const Route = createFileRoute("/checkout/$planId")({
   loader: async () => ({
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/checkout/$planId")({
     accountId: await loadStoreAccountId(),
   }),
   component: CheckoutPage,
-  head: ({ loaderData }) => ({ meta: [{ title: `Checkout — ${loaderData?.brand.title ?? ""}` }] }),
+  head: ({ loaderData }) => ({ meta: [{ title: "Checkout — " + (loaderData?.brand.title ?? "") }] }),
 });
 
 function CheckoutPage() {
@@ -27,17 +27,17 @@ function CheckoutPage() {
   useEffect(() => {
     setReady(true);
     setOrigin(window.location.origin);
-    // Fire add_to_cart and capture event_id for checkout metadata.
-    const eid = trackAddToCart(planId, {
-      value: product?.price,
-      currency: product?.currency ?? "USD",
-    });
-    // Also check if a prior add_to_cart event_id is stored in session.
+    // H3 FIX: do NOT fire add_to_cart here.
+    // The pricing section click handler already fired add_to_cart and stored
+    // the event_id in sessionStorage. We only retrieve it here for checkout
+    // metadata so the server-side pixel can reuse the same (event_name, event_id).
+    // If the user navigated directly (no stored ID), eventId remains undefined
+    // and the checkout session carries no dedup metadata — no duplicate fire.
     const stored = getCheckoutEventId();
-    setEventId(stored ?? eid);
-  }, [planId, product]);
+    if (stored) setEventId(stored);
+  }, [planId]);
 
-  const returnUrl = useMemo(() => (origin ? `${origin}/order-complete` : undefined), [origin]);
+  const returnUrl = useMemo(() => (origin ? origin + "/order-complete" : undefined), [origin]);
 
   return (
     <div className="mx-auto min-h-screen max-w-3xl px-4 py-12">
@@ -47,13 +47,13 @@ function CheckoutPage() {
       </div>
       <h1 className="mt-10 text-3xl font-semibold">Checkout</h1>
       <p className="mt-2 text-muted-foreground">
-        {product ? `${product.title} · ${money(product.price, product.currency)}` : "Complete your order"}
+        {product ? product.title + " · " + money(product.price, product.currency) : "Complete your order"}
       </p>
       <div className="glass-card mt-8 rounded-2xl p-4 sm:p-6">
         {ready && returnUrl ? (
           <ElementsCheckout planId={planId} accountId={accountId} returnUrl={returnUrl} eventId={eventId} />
         ) : (
-          <p className="py-16 text-center text-sm text-muted-foreground">Loading checkout…</p>
+          <p className="py-16 text-center text-sm text-muted-foreground">Loading checkout...</p>
         )}
       </div>
     </div>
