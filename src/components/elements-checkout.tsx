@@ -165,7 +165,7 @@ export function ElementsCheckout({ planId, accountId, returnUrl, eventId }: Elem
       setMounted(false);
       setCardComplete(false);
     };
-  }, [accountId, planId, returnUrl]);
+  }, [accountId, eventId, planId, returnUrl]);
 
   async function onCompletePurchase() {
     const session = sessionRef.current;

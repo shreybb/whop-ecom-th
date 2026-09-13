@@ -18,8 +18,13 @@
  *
  * REST API reference:
  *   https://upstash.com/docs/redis/features/restapi
- *   SET: POST /set/<key>/<value>?nx=true&ex=<seconds>
- *        Response {"result":"OK"} on success, {"result":null} if key already existed.
+ *   Commands are sent as a JSON-body array to the base REST URL:
+ *     POST <UPSTASH_REDIS_REST_URL>
+ *     Authorization: Bearer <token>
+ *     Content-Type: application/json
+ *     Body: ["SET", "<key>", "1", "NX", "EX", "<ttl-seconds>"]
+ *   Response: {"result":"OK"} when the key was newly set,
+ *             {"result":null}  when NX prevented the write (key already existed).
  */
 import type { IdempotencyStore } from "./types";
 
