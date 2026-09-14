@@ -40,6 +40,10 @@ describe('NORTHSTAR_RESOURCES', () => {
     expect(NORTHSTAR_RESOURCES.promo.code).toBe('NORTHSTAR20');
     expect(NORTHSTAR_RESOURCES.promo.id).toBe('promo_9X6Rs6QzxDFI');
   });
+
+  it('monthly checkout link exists for the hosted trial CTA', () => {
+    expect(NORTHSTAR_RESOURCES.checkout.monthly).toBe('ch_peuxeYcymF9M2UA');
+  });
 });
 
 // ── seed.ts guard ─────────────────────────────────────────────────────────────
@@ -76,5 +80,28 @@ describe('seedProducts', () => {
     expect(twk?.price).toBe(297);
     expect(mo?.price).toBe(49);
     expect(yr?.price).toBe(399);
+  });
+});
+
+describe('buildStorefrontCatalog', () => {
+  it('always emits the three seed handles even when the API returns leftover products', async () => {
+    const { buildStorefrontCatalog } = await import('#/lib/catalog.server');
+    const catalog = buildStorefrontCatalog(
+      [
+        { id: 'prod_other', title: 'Starter' },
+        { id: NORTHSTAR_RESOURCES.productId, title: 'Northstar 12 Week Program' },
+      ],
+      [
+        { id: NORTHSTAR_RESOURCES.plans.twelveWeek, initial_price: { amount: 297, currency: 'usd' }, product: NORTHSTAR_RESOURCES.productId },
+        { id: NORTHSTAR_RESOURCES.plans.monthly, renewal_price: { amount: 49, currency: 'usd' }, product: NORTHSTAR_RESOURCES.productId },
+        { id: NORTHSTAR_RESOURCES.plans.yearly, renewal_price: { amount: 399, currency: 'usd' }, product: NORTHSTAR_RESOURCES.productId },
+      ],
+    );
+    expect(catalog.map((p) => p.handle)).toEqual([
+      'northstar-12wk',
+      'northstar-monthly',
+      'northstar-yearly',
+    ]);
+    expect(catalog.every((p) => p.planId.startsWith('plan_'))).toBe(true);
   });
 });

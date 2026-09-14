@@ -3,7 +3,7 @@
  *
  * Keyed by the Standard Webhooks `webhook-id` header value.
  * The store must be durable across process restarts in production
- * (Cloudflare KV, D1, or equivalent).
+ * (Supabase/Postgres unique insert, or equivalent).
  */
 export interface IdempotencyStore {
   /**

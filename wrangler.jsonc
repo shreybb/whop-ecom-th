@@ -4,10 +4,8 @@
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/worker.ts"
-  // Webhook idempotency requires Upstash Redis (atomic SET NX semantics).
+  // Webhook idempotency requires Supabase (unique insert on webhook_deliveries).
   // Add as Worker secrets before deploying:
-  //   wrangler secret put UPSTASH_REDIS_REST_URL
-  //   wrangler secret put UPSTASH_REDIS_REST_TOKEN
-  // Create a free database at console.upstash.com, copy REST URL + REST token.
-  // Without these, the Worker throws at startup in production (fail-closed).
+  //   whop apps secrets set --secret SUPABASE_URL=...
+  //   whop apps secrets set --secret SUPABASE_SERVICE_ROLE_KEY=...
 }

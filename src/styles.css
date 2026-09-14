@@ -22,125 +22,184 @@
   --color-ring: var(--ring);
   --color-surface: var(--surface);
   --color-surface-foreground: var(--surface-foreground);
-  --font-sans: "Golos Text", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Inter var", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 6px);
 }
 
 :root {
-  --background: hsl(222 47% 7%);
-  --foreground: hsl(210 40% 95%);
-  --card: hsl(222 47% 10%);
-  --card-foreground: hsl(210 40% 95%);
-  --popover: hsl(222 47% 10%);
-  --popover-foreground: hsl(210 40% 95%);
-  --primary: hsl(16 90% 55%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(222 30% 16%);
-  --secondary-foreground: hsl(210 40% 90%);
-  --muted: hsl(222 30% 14%);
-  --muted-foreground: hsl(215 20% 55%);
-  --accent: hsl(16 90% 55%);
-  --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(222 30% 18%);
-  --input: hsl(222 30% 18%);
-  --ring: hsl(16 90% 55%);
-  --radius: 0.75rem;
-  --glass-bg: 222 47% 11% / 0.6;
-  --glass-border: 16 90% 55% / 0.15;
-  --glow-cyan: 16 90% 55%;
-  --surface: hsl(222 40% 12%);
-  --surface-foreground: hsl(210 40% 90%);
-}
-
-html.light {
-  --background: hsl(210 40% 98%);
-  --foreground: hsl(222 47% 11%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222 47% 11%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222 47% 11%);
-  --primary: hsl(16 90% 50%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(210 40% 94%);
-  --secondary-foreground: hsl(222 47% 11%);
-  --muted: hsl(210 40% 94%);
-  --muted-foreground: hsl(215 16% 47%);
-  --accent: hsl(16 90% 50%);
-  --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(214 32% 88%);
-  --input: hsl(214 32% 88%);
-  --ring: hsl(16 90% 50%);
-  --glass-bg: 210 40% 98% / 0.8;
-  --glass-border: 214 32% 80% / 0.5;
-  --glow-cyan: 16 90% 50%;
-  --surface: hsl(210 40% 96%);
-  --surface-foreground: hsl(222 47% 11%);
+  --background: #ffffff;
+  --foreground: #202020;
+  --card: #ffffff;
+  --card-foreground: #202020;
+  --popover: #ffffff;
+  --popover-foreground: #202020;
+  --primary: #fa4616;
+  --primary-foreground: #ffffff;
+  --secondary: #fafafa;
+  --secondary-foreground: #202020;
+  --muted: #f3f3f3;
+  --muted-foreground: #646464;
+  --accent: #fff7f4;
+  --accent-foreground: #eb3600;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e6e6e6;
+  --input: #d9d9d9;
+  --ring: #fa4616;
+  --radius: 14px;
+  --surface: #fafafa;
+  --surface-foreground: #202020;
+  --ink-3: #8f8f8f;
+  --orange-10: #eb3600;
+  --orange-2: #fff7f4;
 }
 
 * { box-sizing: border-box; }
 html, body, #app { min-height: 100%; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 body {
   margin: 0;
-  font-family: "Golos Text", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Inter", "Inter var", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   background: var(--background);
   color: var(--foreground);
+  line-height: 1.55;
+  font-size: 16px;
+  letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
 }
-a { color: inherit; text-decoration: none; }
+@supports (font-variation-settings: normal) {
+  :root { --font-sans: "Inter var", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+  body { font-family: "Inter var", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+}
+@layer base {
+  /* Unlayered `a { color: inherit }` beats Tailwind text-* utilities, which
+     made the advertorial CTA white-on-white. Keep inherit in base so utilities win. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.2; }
 
-.glass-card {
-  border-radius: 0.75rem;
-  border-width: 1px;
-  backdrop-filter: blur(24px);
-  background: hsla(var(--glass-bg));
-  border-color: hsla(var(--glass-border));
+.glass-card,
+.glass-card-hover {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
 }
 .glass-card-hover {
-  border-radius: 0.75rem;
-  border-width: 1px;
-  backdrop-filter: blur(24px);
-  background: hsla(var(--glass-bg));
-  border-color: hsla(var(--glass-border));
-  transition: all 0.3s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .glass-card-hover:hover {
-  border-color: color-mix(in oklab, var(--primary) 40%, transparent);
-  box-shadow: 0 0 30px color-mix(in oklab, var(--primary) 15%, transparent);
-  transform: translateY(-4px);
+  border-color: #d9d9d9;
+  box-shadow: 0 8px 24px rgba(32, 32, 32, 0.06);
 }
+
 .glow-button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--primary);
   color: var(--primary-foreground);
-  font-weight: 600;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  transition: all 0.3s;
-  box-shadow: 0 0 20px color-mix(in oklab, var(--primary) 30%, transparent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
 }
 .glow-button:hover {
-  box-shadow: 0 0 40px color-mix(in oklab, var(--primary) 50%, transparent);
-  transform: translateY(-2px);
+  background: var(--orange-10);
+  border-color: var(--orange-10);
 }
+
+.ns-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #202020;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.ns-btn:hover { border-color: #8f8f8f; }
+
+.ns-btn-on-primary {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: #fff;
+  color: #fa4616;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 32px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
 .glow-text {
-  color: var(--primary);
-  text-shadow: 0 0 20px color-mix(in oklab, var(--primary) 50%, transparent);
+  color: var(--orange-10);
 }
-.section-padding { padding: 5rem 1rem; }
+
+.ns-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--orange-10);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ns-eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.ns-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #202020;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 650;
+  font-size: 14px;
+  flex: none;
+}
+
+.ns-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.section-padding { padding: 48px 16px; }
 @media (min-width: 768px) {
-  .section-padding { padding: 7rem 1rem; }
+  .section-padding { padding: 64px 24px; }
 }
+
 .gradient-bg {
-  background: radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--primary) 8%, transparent) 0%, transparent 60%);
+  background: var(--surface);
 }
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-}
-.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }

@@ -10,6 +10,7 @@ type ElementsCheckoutProps = {
   accountId?: string;
   returnUrl: string;
   eventId?: string;
+  submitLabel?: string;
 };
 
 type ElementAddress = {
@@ -57,7 +58,7 @@ function loadScript(src: string) {
   });
 }
 
-export function ElementsCheckout({ planId, accountId, returnUrl, eventId }: ElementsCheckoutProps) {
+export function ElementsCheckout({ planId, accountId, returnUrl, eventId, submitLabel = "Pay now" }: ElementsCheckoutProps) {
   const brandingRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLDivElement>(null);
   const addressRef = useRef<HTMLDivElement>(null);
@@ -245,7 +246,7 @@ export function ElementsCheckout({ planId, accountId, returnUrl, eventId }: Elem
           disabled={!readyToPay}
           onClick={onCompletePurchase}
         >
-          {submitting ? "Working…" : "Pay now"}
+          {submitting ? "Working…" : submitLabel}
         </button>
         <div className="mt-4 min-h-5" ref={brandingRef} />
       </div>

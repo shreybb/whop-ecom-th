@@ -5,7 +5,7 @@ import { loadStoreBrand } from "#/lib/server-fns";
 import { BrandProvider } from "#/lib/store";
 import appCss from "../styles.css?url";
 
-const FONT = "https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&display=swap";
+const FONT = "https://rsms.me/inter/inter.css";
 
 // Whop pixel: auto-loaded for biz_MIbRyC2ejVkuzs.
 // On Whop-hosted pages (*.whop.site) the platform injects this automatically.
@@ -22,7 +22,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Transform your physique in 12 weeks with the Northstar Method — structured training, precision nutrition, and a private coaching community.",
+          "Transform your physique in 12 weeks with the Northstar Method: structured training, precision nutrition, and a private coaching community.",
       },
     ],
     links: [
@@ -37,7 +37,7 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { brand } = Route.useLoaderData();
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>

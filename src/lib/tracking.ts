@@ -75,3 +75,19 @@ export function getCheckoutEventId(): string | null {
   if (typeof sessionStorage === "undefined") return null;
   return sessionStorage.getItem(SESSION_CHECKOUT_EVENT_ID_KEY);
 }
+
+/** Fire add_to_cart, then hard-navigate to embedded checkout. */
+export function startCheckout(planId: string, extraData?: Record<string, unknown>) {
+  trackAddToCart(planId, extraData);
+  if (typeof window !== "undefined") {
+    window.location.assign(`/checkout/${planId}`);
+  }
+}
+
+/** Fire add_to_cart, then send the buyer to a Whop-hosted checkout link. */
+export function startHostedCheckout(planId: string, checkoutUrl: string, extraData?: Record<string, unknown>) {
+  trackAddToCart(planId, extraData);
+  if (typeof window !== "undefined") {
+    window.location.assign(checkoutUrl);
+  }
+}

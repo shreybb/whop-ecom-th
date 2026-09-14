@@ -1,41 +1,36 @@
 /**
  * Idempotency store factory.
  *
- * Production adapter: UpstashRedisStore
- *   Requires UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.
- *   Uses Redis SET NX EX — genuinely atomic, no TOCTOU races.
- *   Fails closed (throws) if either env var is missing in production.
+ * Production adapter: SupabaseIdempotencyStore
+ *   Requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
+ *   Unique primary-key insert — atomic under concurrent Whop retries.
+ *   Fails closed if either env var is missing in production.
  *
  * Dev/test adapter: MemoryIdempotencyStore
- *   In-memory Map with mutex for concurrent calls. Not durable — dev/test only.
+ *   In-memory Map with mutex. Not durable.
  */
 import { MemoryIdempotencyStore } from "./memory";
-import { UpstashRedisStore } from "./upstash-redis";
+import { SupabaseIdempotencyStore } from "./supabase";
 import type { IdempotencyStore } from "./types";
 
 export type { IdempotencyStore };
 export { MemoryIdempotencyStore } from "./memory";
-export { UpstashRedisStore } from "./upstash-redis";
+export { SupabaseIdempotencyStore } from "./supabase";
 
-export interface UpstashEnv {
-  UPSTASH_REDIS_REST_URL?: string;
-  UPSTASH_REDIS_REST_TOKEN?: string;
+export interface IdempotencyEnv {
+  SUPABASE_URL?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
 }
 
-/**
- * Create the appropriate idempotency store.
- *
- * @param env - Worker env object. If UPSTASH_REDIS_REST_URL and
- *              UPSTASH_REDIS_REST_TOKEN are present, returns UpstashRedisStore.
- *              Otherwise falls back to MemoryIdempotencyStore, but throws in
- *              production to prevent silent data loss.
- */
-export function createIdempotencyStore(env?: UpstashEnv): IdempotencyStore {
-  const url = env?.UPSTASH_REDIS_REST_URL;
-  const token = env?.UPSTASH_REDIS_REST_TOKEN;
+/** Alias for WhopWebhookEnv until that interface is renamed. */
+export type UpstashEnv = IdempotencyEnv;
 
-  if (url && token) {
-    return new UpstashRedisStore({ restUrl: url, restToken: token });
+export function createIdempotencyStore(env?: IdempotencyEnv): IdempotencyStore {
+  const url = env?.SUPABASE_URL;
+  const key = env?.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (url && key) {
+    return new SupabaseIdempotencyStore({ url, serviceRoleKey: key });
   }
 
   const isProduction =
@@ -45,9 +40,9 @@ export function createIdempotencyStore(env?: UpstashEnv): IdempotencyStore {
 
   if (isProduction) {
     throw new Error(
-      "[Northstar] UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production. " +
-        "Create a free Upstash Redis database and add the credentials as Worker secrets. " +
-        "See README.md § Webhook idempotency.",
+      "[Northstar] SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required in production. " +
+        "Create a free Supabase project, run the webhook_deliveries table SQL, and add the " +
+        "URL plus service-role key as Worker secrets. See README.md § Webhook idempotency.",
     );
   }
 

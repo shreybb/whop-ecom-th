@@ -7,6 +7,7 @@ function apiKey() {
   return readEnv("WHOP_API_KEY");
 }
 
+/** Production host. Override with WHOP_API_ORIGIN only for local sandbox rehearsal. */
 function apiOrigin() {
   return readEnv("WHOP_API_ORIGIN") ?? "https://api.whop.com";
 }

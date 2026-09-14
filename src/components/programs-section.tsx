@@ -1,31 +1,37 @@
 import { ArrowRight } from "lucide-react";
-import type { Product } from "#/lib/catalog";
-import { money } from "#/lib/money";
+import { Link } from "@tanstack/react-router";
+import { NORTHSTAR_RESOURCES } from "#/lib/resources";
+import { startHostedCheckout } from "#/lib/tracking";
 
-export function ProgramsSection({ products }: { products: Product[] }) {
+const WAITLIST_URL = `https://whop.com/checkout/${NORTHSTAR_RESOURCES.plans.cohortWaitlist}`;
+
+export function ProgramsSection() {
   return (
-    <section id="program" className="section-padding">
-      <div className="container mx-auto">
-        <p className="mb-3 text-center text-sm font-semibold uppercase tracking-widest text-primary">What You Get</p>
-        <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
-          The <span className="glow-text">Complete System</span>
-        </h2>
-        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
-            <div key={product.id} className="glass-card-hover flex flex-col p-6">
-              <div className="mb-3 text-3xl">
-                {product.planType === "one_time" ? "🏋️" : product.price < 100 ? "📅" : "🏆"}
-              </div>
-              <h3 className="mb-2 text-lg font-bold">{product.title}</h3>
-              <p className="mb-4 flex-1 text-sm text-muted-foreground">{product.description}</p>
-              <div className="flex items-center justify-between">
-                <span className="glow-text font-bold">{money(product.price, product.currency)}</span>
-                <a href={`/checkout/${product.planId}`} className="flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
-                  Get Started <ArrowRight size={14} />
-                </a>
-              </div>
-            </div>
-          ))}
+    <section id="program" className="ns-wrap py-12">
+      <p className="ns-eyebrow mb-4">The product</p>
+      <h2 className="mb-6 text-[28px] font-bold md:text-[32px]">Northstar 12 Week Program</h2>
+      <div className="grid gap-3.5 md:grid-cols-2">
+        <div className="glass-card flex flex-col p-5">
+          <h3 className="mb-1.5 text-lg font-semibold">One product. Course, chat, and forum.</h3>
+          <p className="mb-4 flex-1 text-sm text-muted-foreground">
+            Structured 12-week training, precision nutrition, a video course, private chat, and a member forum. Buy once or subscribe. Same access either way.
+          </p>
+          <Link to="/" hash="pricing" className="relative z-10 flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+            See plans <ArrowRight size={14} />
+          </Link>
+        </div>
+        <div className="glass-card flex flex-col p-5">
+          <h3 className="mb-1.5 text-lg font-semibold">Live cohort waitlist</h3>
+          <p className="mb-4 flex-1 text-sm text-muted-foreground">
+            Next coach-led cohort. Join the waitlist and we will email you when seats open. Founding-member pricing stays off this page.
+          </p>
+          <button
+            type="button"
+            onClick={() => startHostedCheckout(NORTHSTAR_RESOURCES.plans.cohortWaitlist, WAITLIST_URL, { source: "waitlist" })}
+            className="relative z-10 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+          >
+            Join waitlist <ArrowRight size={14} />
+          </button>
         </div>
       </div>
     </section>

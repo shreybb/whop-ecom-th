@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
   loader: async () => ({ products: await loadStoreCatalog() }),
   component: Home,
   head: () => ({
-    meta: [{ title: "Northstar Method — 12-Week Fitness Transformation" }],
+    meta: [{ title: "Northstar Method | 12-Week Fitness Transformation" }],
   }),
 });
 

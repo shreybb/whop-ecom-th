@@ -1,76 +1,106 @@
 import { useEffect, useState } from "react";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
 import { useBrand } from "#/lib/store";
+import { hostedCheckoutUrl, NORTHSTAR_RESOURCES } from "#/lib/resources";
+import { startHostedCheckout } from "#/lib/tracking";
 
-const navLinks = ["About", "Program", "Pricing", "Testimonials", "FAQ"];
+const navLinks = ["About", "Program", "Pricing", "Testimonials"];
+const TRIAL_URL = hostedCheckoutUrl(NORTHSTAR_RESOURCES.checkout.monthly);
 
 export function Navbar() {
   const brand = useBrand();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved === "light") {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-      setIsDark(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
+    const handler = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    if (next) {
-      document.documentElement.classList.add("dark");
-      document.documentElement.classList.remove("light");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-      localStorage.setItem("theme", "light");
-    }
-  };
-
   return (
-    <nav className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${scrolled ? "glass-card border-b py-3" : "bg-transparent py-5"}`}>
-      <div className="container mx-auto flex items-center justify-between px-4">
-        <a href="/" className="text-xl font-bold glow-text">{brand.companyName}</a>
-        <div className="hidden items-center gap-6 md:flex">
+    <header
+      className={`sticky top-0 z-50 border-b border-border backdrop-blur-[10px] ${
+        scrolled ? "bg-background/86" : "bg-background/86"
+      }`}
+    >
+      <div className="ns-wrap flex h-[60px] items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5 text-[17px] font-bold tracking-[-0.02em]">
+          <span className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+            NS
+          </span>
+          {brand.companyName}
+        </Link>
+        <nav className="hidden items-center gap-5 md:flex">
           {navLinks.map((l) => (
-            <a key={l} href={`/#${l.toLowerCase()}`} className="text-sm text-muted-foreground transition-colors hover:text-primary">{l}</a>
+            <Link
+              key={l}
+              to="/"
+              hash={l.toLowerCase()}
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {l}
+            </Link>
           ))}
+        </nav>
+        <div className="hidden items-center gap-2 md:flex">
+          <a href="/advertorial" className="ns-btn">
+            Free guide
+          </a>
+          <a
+            href={TRIAL_URL}
+            onClick={(e) => {
+              e.preventDefault();
+              startHostedCheckout(NORTHSTAR_RESOURCES.plans.monthly, TRIAL_URL, { source: "nav_trial" });
+            }}
+            className="glow-button"
+          >
+            Start free trial
+          </a>
         </div>
-        <div className="hidden items-center gap-3 md:flex">
-          <button type="button" onClick={toggleTheme} className="rounded-lg p-2 text-muted-foreground transition-colors hover:text-foreground">
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-          <a href="/#pricing" className="glow-button text-sm">Join Now</a>
-        </div>
-        <div className="flex items-center gap-2 md:hidden">
-          <button type="button" onClick={toggleTheme} className="p-2 text-muted-foreground">
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-          <button type="button" onClick={() => setIsOpen(!isOpen)} className="p-2 text-foreground">
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-foreground md:hidden"
+          aria-label="Open menu"
+        >
+          {isOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
       {isOpen ? (
-        <div className="glass-card mx-4 mt-2 rounded-xl p-4 md:hidden">
+        <div className="border-t border-border px-6 py-4 md:hidden">
           {navLinks.map((l) => (
-            <a key={l} href={`/#${l.toLowerCase()}`} onClick={() => setIsOpen(false)} className="block py-2 text-muted-foreground transition-colors hover:text-primary">{l}</a>
+            <Link
+              key={l}
+              to="/"
+              hash={l.toLowerCase()}
+              onClick={() => setIsOpen(false)}
+              className="block py-2 text-sm text-muted-foreground"
+            >
+              {l}
+            </Link>
           ))}
-          <a href="/#pricing" className="glow-button mt-3 block text-center text-sm">Join Now</a>
+          <a
+            href="/advertorial"
+            onClick={() => setIsOpen(false)}
+            className="ns-btn mt-3 w-full"
+          >
+            Free guide
+          </a>
+          <a
+            href={TRIAL_URL}
+            onClick={(e) => {
+              e.preventDefault();
+              setIsOpen(false);
+              startHostedCheckout(NORTHSTAR_RESOURCES.plans.monthly, TRIAL_URL, { source: "nav_trial_mobile" });
+            }}
+            className="glow-button mt-3 w-full"
+          >
+            Start free trial
+          </a>
         </div>
       ) : null}
-    </nav>
+    </header>
   );
 }

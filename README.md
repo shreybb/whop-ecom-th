@@ -15,7 +15,7 @@ Fitness coaching storefront built on Whop, implementing the FDE assessment requi
 - **Checkout:** Whop Elements embedded checkout + checkout-link CTAs
 - **Pixel:** Whop pixel (`https://t.whop.tw/e/{biz_id}.js`) for browser-side tracking
 - **Webhooks:** Standard Webhooks signature verification (`standardwebhooks` library)
-- **Idempotency:** In-memory adapter (dev/test) + Upstash Redis `SET NX` (prod)
+- **Idempotency:** In-memory adapter (dev/test) + Supabase/Postgres unique insert (prod)
 
 ---
 
@@ -43,9 +43,9 @@ See `.env.example` for the full list.
 |---|---|---|
 | `WHOP_API_KEY` | Yes | From whop.com/dashboard → Settings → API |
 | `WHOP_COMPANY_ID` | Yes | `biz_MIbRyC2ejVkuzs` (defaulted in `.env.example`) |
-| `WHOP_WEBHOOK_SECRET` | Yes | From webhook registration (format: `whsec_...`) |
-| `UPSTASH_REDIS_REST_URL` | Yes (prod) | Upstash Redis REST URL |
-| `UPSTASH_REDIS_REST_TOKEN` | Yes (prod) | Upstash Redis REST token |
+| `WHOP_WEBHOOK_SECRET` | Yes | From webhook registration (`ws_...`) |
+| `SUPABASE_URL` | Yes (prod) | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes (prod) | Supabase service-role key (server only) |
 | `WHOP_API_ORIGIN` | No | Override API base (default: https://api.whop.com) |
 
 Plan IDs (`WHOP_PLAN_*`) are public identifiers and are **already hardcoded** in
@@ -88,18 +88,26 @@ All public Northstar Whop resource IDs live in `src/lib/resources.ts`:
 
 ## Webhook Idempotency (Production)
 
-The in-memory store is **dev/test only**. Production requires Upstash Redis:
+The in-memory store is **dev/test only**. Production uses a Supabase table with a
+unique primary key. Concurrent inserts of the same `webhook-id` cannot both succeed.
 
-```bash
-# 1. Create a free Redis database at console.upstash.com
-# 2. Add secrets to the Cloudflare Worker:
-wrangler secret put UPSTASH_REDIS_REST_URL
-wrangler secret put UPSTASH_REDIS_REST_TOKEN
+```sql
+create table if not exists public.webhook_deliveries (
+  id text primary key,
+  created_at timestamptz not null default now()
+);
+
+alter table public.webhook_deliveries enable row level security;
 ```
 
-The `UpstashRedisStore` uses `SET key value NX EX <ttl>` — a single atomic Redis
-operation — so concurrent Whop retries cannot both claim the same webhook ID.
-Without Redis credentials, the Worker throws at startup in production (fail-closed).
+Then add Worker secrets:
+
+```bash
+whop apps secrets set --secret SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+whop apps secrets set --secret SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
+```
+
+Without those secrets the Worker fails closed in production.
 
 ---
 
@@ -162,37 +170,12 @@ Tests cover:
 - Timestamp boundaries (5-minute tolerance, stale, future)
 - C1 regression: invalid signature does not consume the webhook ID
 - Sequential and concurrent idempotency (MemoryIdempotencyStore)
-- Upstash Redis adapter: new key, duplicate key, concurrent contention
+- Supabase adapter: insert returns row, conflict returns empty, concurrent contention
 - Event dispatch: `payment.succeeded` fires `add_to_cart` to `/api/v1/events`
 - Tracking utilities (UUID uniqueness, sessionStorage persistence)
 
 ---
 
-## Remaining Manual / Dashboard Steps
+## Live dashboard (already configured)
 
-### ✅ Complete
-- [x] Business created: `biz_MIbRyC2ejVkuzs`
-- [x] App created and linked: `app_wJzJqgIuWNnbPd`
-- [x] Product created: `prod_TR58zZsbQFwJu`
-- [x] Three public plans created (12-Week, Monthly, Annual)
-- [x] Founding hidden plan and cohort waitlist plan created
-- [x] Promo code `NORTHSTAR20` created (`promo_9X6Rs6QzxDFI`)
-- [x] Storefront live at `https://northstar-method-fde.whop.site`
-- [x] Pixel tracking implemented (view_content, lead, add_to_cart)
-- [x] Webhook handler with Standard Webhooks verification
-- [x] Server-side pixel (add_to_cart dedup) via `/api/v1/events`
-- [x] Atomic idempotency with Upstash Redis SET NX
-
-### 🔲 Still Requires Manual Action
-- [ ] Set redirect URL after checkout to: `https://northstar-method-fde.whop.site/order-complete`
-- [ ] Register webhook: `https://northstar-method-fde.whop.site/api/webhooks`
-- [ ] Provision Upstash Redis and add secrets to Worker
-- [ ] Connect Meta Pixel ID: **Settings → Integrations → Meta Pixel**
-- [ ] Set up affiliate program: **Marketing → Affiliates** (global and member rates)
-- [ ] Configure post-purchase upsell to Annual plan
-- [ ] Enable automated abandoned-checkout message
-- [ ] Build Ads campaign (stop at review screen)
-- [ ] Invite advertiser role team member
-- [ ] Verify identity to unlock payouts: **Settings → Verification**
-- [ ] Buy a test $1 plan to confirm checkout + webhook flow end-to-end
-- [ ] Partially refund the test payment via API; confirm `refund.created` arrives
+Thank-you URL, webhook `hook_Sr9WlFgzJquMb`, affiliates (20% global / 30% member), promo `NORTHSTAR20`, and Meta pixel ID live on `biz_MIbRyC2ejVkuzs`. IDs are in `src/lib/resources.ts`. Worker secrets: `WHOP_WEBHOOK_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.

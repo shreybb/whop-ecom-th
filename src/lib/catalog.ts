@@ -9,6 +9,8 @@ export type Product = {
   collection: string;
   planId: string;
   planType: string;
+  trialDays?: number;
+  interval?: "month" | "year";
 };
 
 export const COLLECTIONS = [
@@ -36,6 +38,6 @@ export const PLAN_FEATURES: Record<string, string[]> = {
     "1-on-1 strategy session (1hr)",
     "Priority coach support",
     "Exclusive annual member events",
-    "Best value — 2 months free",
+    "Best value: 2 months free",
   ],
 };

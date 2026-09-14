@@ -1,40 +1,46 @@
+import { Link } from "@tanstack/react-router";
+import { hostedCheckoutUrl, NORTHSTAR_RESOURCES } from "#/lib/resources";
+import { startHostedCheckout } from "#/lib/tracking";
+
 interface HeroSectionProps {
   onOpenModal?: () => void;
 }
 
+const TRIAL_URL = hostedCheckoutUrl(NORTHSTAR_RESOURCES.checkout.monthly);
+
 export function HeroSection({ onOpenModal }: HeroSectionProps) {
   return (
-    <section className="section-padding relative flex min-h-screen items-center justify-center overflow-hidden pt-32">
-      <div className="absolute inset-0">
-        <img src="/hero-bg.jpg" alt="" className="h-full w-full object-cover opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
+    <section className="ns-wrap pb-6 pt-16">
+      <p className="ns-eyebrow mb-4">12-week fitness program</p>
+      <h1 className="max-w-[18ch] text-[clamp(32px,5vw,52px)] font-bold">
+        Build the body you were made for.
+        <br />
+        Then keep it.
+      </h1>
+      <p className="mt-4 max-w-[62ch] text-[19px] text-muted-foreground">
+        One product: Northstar 12 Week Program. Buy it outright, start a 7-day free trial on the monthly community, or pay yearly.
+      </p>
+      <div className="mt-7 flex flex-wrap gap-2">
+        <a
+          href={TRIAL_URL}
+          onClick={(e) => {
+            e.preventDefault();
+            startHostedCheckout(NORTHSTAR_RESOURCES.plans.monthly, TRIAL_URL, { source: "hero_trial" });
+          }}
+          className="glow-button px-5 py-2.5 text-[15px]"
+        >
+          Start 7-day free trial
+        </a>
+        <Link to="/" hash="pricing" className="ns-btn px-5 py-2.5 text-[15px]">
+          See plans
+        </Link>
+        <button type="button" onClick={onOpenModal} className="ns-btn px-5 py-2.5 text-[15px]">
+          Get the free guide
+        </button>
       </div>
-      <div className="bg-primary/10 animate-pulse-glow absolute top-1/4 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full blur-[120px]" />
-      <div className="relative z-10 mx-auto max-w-3xl text-center">
-        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary">12-Week Transformation Program</p>
-        <h1 className="mb-6 text-4xl leading-tight font-extrabold md:text-6xl">
-          Build the Body You Were Made For —{" "}
-          <span className="glow-text">No Guesswork Required</span>
-        </h1>
-        <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground md:text-xl">
-          The Northstar Method is a proven 12-week system built for people who are serious about changing their physique, not just going through the motions.
-        </p>
-        <div className="mb-8 flex flex-col justify-center gap-4 sm:flex-row">
-          <a href="/#pricing" className="glow-button px-8 py-4 text-lg">Start Your Transformation</a>
-          <button
-            type="button"
-            onClick={onOpenModal}
-            className="rounded-lg border border-primary/30 px-8 py-4 font-semibold text-foreground transition-all duration-300 hover:bg-primary/10"
-          >
-            Get Free Training Guide
-          </button>
-        </div>
-        <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-          <span>⚡ 2,400+ transformations</span>
-          <span>⭐ 4.9 average rating</span>
-          <span>🏆 Certified Strength Coach</span>
-        </div>
-      </div>
+      <p className="mt-6 text-sm text-muted-foreground">
+        2,400+ transformations · 4.9 rating · CSCS-certified coaching
+      </p>
     </section>
   );
 }

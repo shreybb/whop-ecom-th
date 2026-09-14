@@ -20,6 +20,7 @@ function p(
   price: number,
   planId: string,
   planType: string,
+  extra: Partial<Pick<Product, "trialDays" | "interval">> = {},
   collection = "programs",
 ): Product {
   return {
@@ -29,36 +30,39 @@ function p(
     description,
     price,
     currency: "USD",
-    image: "/hero-bg.jpg",
+    image: "",
     collection,
     planId,
     planType,
+    ...extra,
   };
 }
 
 export const seedProducts: Product[] = [
   p(
     "northstar-12wk",
-    "Northstar 12-Week Program",
-    "A complete 12-week fitness transformation: training plans, nutrition coaching, and a private community.",
+    "12-Week Program",
+    "Lifetime access to the complete Northstar Method: training, nutrition, course, chat, and forum.",
     297,
     NORTHSTAR_RESOURCES.plans.twelveWeek,
     "one_time",
   ),
   p(
     "northstar-monthly",
-    "Northstar Monthly",
-    "Full program access plus weekly live Q&A and direct coach messaging. Includes a 7-day free trial.",
+    "Monthly Community",
+    "Full program access plus weekly live Q&A and direct coach messaging. 7-day free trial, then $49 per month.",
     49,
     NORTHSTAR_RESOURCES.plans.monthly,
-    "recurring",
+    "renewal",
+    { trialDays: 7, interval: "month" },
   ),
   p(
     "northstar-yearly",
-    "Northstar Annual",
+    "Annual Membership",
     "Best value. Everything in Monthly plus a 1-on-1 strategy session and priority support.",
     399,
     NORTHSTAR_RESOURCES.plans.yearly,
-    "recurring",
+    "renewal",
+    { interval: "year" },
   ),
 ];

@@ -3,7 +3,7 @@
  *
  * WARNING: This store does NOT survive process restarts and is NOT safe for
  * production use. It will allow duplicate events after a restart.
- * Use UpstashRedisStore in production.
+ * Use SupabaseIdempotencyStore in production.
  */
 import type { IdempotencyStore } from "./types";
 

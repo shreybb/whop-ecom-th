@@ -10,14 +10,32 @@ import type { UpstashEnv } from "#/lib/idempotency/index";
 export interface WhopWebhookEnv extends UpstashEnv {
   WHOP_WEBHOOK_SECRET?: string;
   WHOP_API_KEY?: string;
+  /** Fallback: hosted runtime reserves WHOP_API_KEY as a secret name. */
+  NORTHSTAR_API_KEY?: string;
   WHOP_API_ORIGIN?: string;
   WHOP_COMPANY_ID?: string;
 }
 
 export interface WebhookEvent {
   type: string;
-  action: string;
+  /** Present only on older split envelopes (`type: "payment", action: "succeeded"`). */
+  action?: string;
   data: Record<string, unknown>;
+}
+
+/** Current Whop envelopes use `type: "payment.succeeded"`. Older fixtures split type/action. */
+export function webhookEventName(event: Pick<WebhookEvent, "type" | "action">): string {
+  if (event.type.includes(".")) return event.type;
+  return event.action ? event.type + "." + event.action : event.type;
+}
+
+/**
+ * Whop HMAC-signs with the literal `ws_...` bytes. `standardwebhooks` base64-decodes
+ * its constructor argument, so we encode first. `whsec_` test secrets pass through.
+ */
+export function verifierSecret(secret: string): string {
+  if (secret.startsWith("ws_")) return btoa(secret);
+  return secret;
 }
 
 const SUPPORTED_EVENTS = new Set([
@@ -32,7 +50,7 @@ export function verifyWebhookSignature(
   rawBody: string,
   headers: Record<string, string>,
 ): WebhookEvent {
-  const wh = new Webhook(secret);
+  const wh = new Webhook(verifierSecret(secret));
   const parsed = wh.verify(rawBody, headers);
   return parsed as WebhookEvent;
 }
@@ -106,7 +124,7 @@ export async function dispatchWebhookEvent(
   event: WebhookEvent,
   env: WhopWebhookEnv,
 ): Promise<void> {
-  const key = event.type + "." + event.action;
+  const key = webhookEventName(event);
   if (key === "payment.succeeded") await handlePaymentSucceeded(event, env);
   else if (key === "membership.activated") await handleMembershipActivated(event);
   else if (key === "membership.deactivated") await handleMembershipDeactivated(event);
@@ -158,7 +176,7 @@ export async function handleWebhookRequest(
   const isNew = await idem.checkAndMark(wid);
   if (!isNew) return new Response("Already processed", { status: 200 });
 
-  const eventKey = event.type + "." + event.action;
+  const eventKey = webhookEventName(event);
   if (!SUPPORTED_EVENTS.has(eventKey)) return new Response("Event type not handled", { status: 200 });
 
   try { await dispatchWebhookEvent(event, env); }

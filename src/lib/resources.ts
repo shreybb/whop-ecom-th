@@ -3,7 +3,7 @@
  *
  * Plan IDs, product IDs, and business IDs are NOT secrets: they are public
  * resource handles visible in any checkout link. They are safe to commit.
- * API keys, webhook secrets, and Upstash tokens are secrets and must stay
+ * API keys, webhook secrets, and Supabase service-role keys are secrets and must stay
  * in environment variables / Worker secrets — never here.
  *
  * This file is the single source of truth for all Northstar Whop resources.
@@ -47,4 +47,26 @@ export const NORTHSTAR_RESOURCES = {
     /** 20% off promo code */
     code: "NORTHSTAR20",
   },
+
+  checkout: {
+    twelveWeek: "ch_GUITeCuFQSsUf0n",
+    monthly: "ch_peuxeYcymF9M2UA",
+    hiddenTest: "ch_PPOd3C0krNqnqdh",
+  },
+
+  experiences: {
+    publicForum: "exp_oC4tI7HLhXci5l",
+    forum: "exp_wWXCA4km9xrffg",
+    courses: "exp_j578odAay6t0fM",
+    chat: "exp_okBDtFfCQFWRWq",
+  },
+
+  webhook: {
+    id: "hook_Sr9WlFgzJquMb",
+    url: "https://northstar-method-fde.whop.site/api/webhooks",
+  },
 } as const;
+
+export function hostedCheckoutUrl(checkoutId: string): string {
+  return `https://whop.com/checkout/${checkoutId}/`;
+}

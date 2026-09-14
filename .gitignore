@@ -11,3 +11,16 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
+coverage
+*.tsbuildinfo
+
+# FDE working notes, not the contractor repo
+docs/FDE-PROGRESS.md
+docs/ASSESSMENT-ANSWERS.md
+docs/whop-ecommerce-fde-assessment.html
+docs/ads/
+
+# Local Supabase CLI scaffold; keep migrations/
+supabase/config.toml
+supabase/.temp
+supabase/.branches

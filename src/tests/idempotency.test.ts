@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { createIdempotencyStore } from '#/lib/idempotency/index';
 import { MemoryIdempotencyStore } from '#/lib/idempotency/memory';
+import { SupabaseIdempotencyStore } from '#/lib/idempotency/supabase';
 
 describe('MemoryIdempotencyStore', () => {
   it('has returns false for unknown key', async () => {
@@ -56,5 +58,20 @@ describe('MemoryIdempotencyStore', () => {
     await store.mark('a');
     expect(await store.has('a')).toBe(true);
     expect(await store.has('b')).toBe(false);
+  });
+});
+
+describe('createIdempotencyStore', () => {
+  it('uses Supabase when URL and service-role key are set', () => {
+    const store = createIdempotencyStore({
+      SUPABASE_URL: 'https://example.supabase.co',
+      SUPABASE_SERVICE_ROLE_KEY: 'service-role',
+    });
+    expect(store).toBeInstanceOf(SupabaseIdempotencyStore);
+  });
+
+  it('falls back to memory without credentials outside production', () => {
+    const store = createIdempotencyStore({});
+    expect(store).toBeInstanceOf(MemoryIdempotencyStore);
   });
 });

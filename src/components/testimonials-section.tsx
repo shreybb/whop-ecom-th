@@ -1,5 +1,3 @@
-import { Star, User } from "lucide-react";
-
 const testimonials = [
   {
     text: "Down 22 lbs and my strength numbers are the best they have ever been. The structure is what made the difference.",
@@ -20,32 +18,20 @@ const testimonials = [
 
 export function TestimonialsSection() {
   return (
-    <section id="testimonials" className="section-padding gradient-bg">
-      <div className="container mx-auto">
-        <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
-          Real People, <span className="glow-text">Real Results</span>
-        </h2>
-        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-          {testimonials.map((t) => (
-            <div key={t.name} className="glass-card-hover p-6">
-              <div className="mb-4 flex gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="fill-primary text-primary" size={16} />
-                ))}
-              </div>
-              <p className="mb-4 text-muted-foreground italic">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
-                  <User className="text-muted-foreground" size={18} />
-                </div>
-                <div>
-                  <span className="block text-sm font-semibold">{t.name}</span>
-                  <span className="block text-xs text-primary">{t.tag}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+    <section id="testimonials" className="ns-wrap py-12">
+      <p className="ns-eyebrow mb-4">Results</p>
+      <h2 className="mb-6 text-[28px] font-bold md:text-[32px]">Real people, real results</h2>
+      <div className="grid gap-3.5 md:grid-cols-3">
+        {testimonials.map((t) => (
+          <div key={t.name} className="glass-card p-5">
+            <p className="mb-4 text-[15px] font-medium">“{t.text}”</p>
+            <p className="mb-0 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{t.name}</span>
+              {" · "}
+              {t.tag}
+            </p>
+          </div>
+        ))}
       </div>
     </section>
   );
